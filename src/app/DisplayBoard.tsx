@@ -1,51 +1,88 @@
+"use client";
+
 import { Quote } from "lucide-react";
-
-import { BiLeftArrow, BiRightArrow } from "react-icons/bi";
-
-import { LiaLinkedin } from "react-icons/lia";
+import { motion } from "framer-motion";
+import { useState } from "react";
+import { useGetQuoteQuery } from "@/state/posts/postsApiSlice";
 
 const DisplayBoard = () => {
+  const [refreshTrigger, setRefreshTrigger] = useState(0); // To trigger a refresh
+  const {
+    data: quoteData,
+    isLoading,
+    error,
+  } = useGetQuoteQuery(refreshTrigger);
+
   return (
-    <div className="max-w-2xl  md:w-[500px] md:h-[300px] flex items-center justify-center border rounded-lg bg-gray-400/20">
-      <div className="relative w-full h-full flex flex-col items-center">
-        {/* top */}
-        <div className="flex-1 flex justify-center items-center px-16 py-8">
-          <div className="flex flex-col w-full h-full  gap-4 ">
-            <div className="flex gap-2 items-start flex-1 ">
-              <Quote size={64} />
-              <h2 className="font-bold text-2xl py-2">
-                When I let go of what I am, I become what I might be.
-              </h2>
+    <motion.div
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 0.6 }}
+      className="max-w-lg w-full sm:w-[500px] px-6 flex items-center justify-center border rounded-2xl bg-gradient-to-br from-blue-100 via-purple-200 to-pink-300 shadow-xl dark:from-gray-800 dark:to-gray-900"
+    >
+      <div className="relative w-full h-auto flex flex-col items-center">
+        {/* Top Section */}
+        <div className="flex-1 flex justify-center items-center px-6 sm:px-16 py-6 sm:py-8">
+          <div className="flex flex-col w-full h-auto gap-5">
+            {/* Quote Section */}
+            <div className="flex gap-4 items-start flex-1">
+              {isLoading ? (
+                <span className="text-lg text-gray-600 dark:text-gray-300">
+                  Loading...
+                </span>
+              ) : error ? (
+                <span className="text-lg text-red-500">
+                  Failed to fetch quote.
+                </span>
+              ) : (
+                <>
+                  <Quote
+                    size={96}
+                    className="text-indigo-600 sm:text-2xl md:text-4xl lg:text-6xl"
+                  />
+
+                  <h2 className="font-semibold text-xl sm:text-2xl leading-snug text-gray-900 dark:text-white italic text-center">
+                    {/* Display quote with no fixed height */}
+                    {quoteData?.[0]?.quote || "No quote available"}
+                  </h2>
+                </>
+              )}
             </div>
-            <div className="flex justify-end py-2 px-4">
-              <p className="text-blue-700">
-                - <i>sucks</i>
+            {/* Author Section */}
+            <div className="flex justify-end mt-4">
+              <p className="text-lg text-blue-700 sm:text-xl dark:text-blue-400">
+                - <i>{quoteData?.[0]?.author || "Unknown"}</i>
               </p>
             </div>
-            <div className="flex justify-between">
-              <div className="flex gap-4">
-                <button
-                  className="flex justify-center items-center p-4 bg-sky-500 rounded-lg
-                "
+
+            {/* Refresh Button Section */}
+            <div className="flex justify-center items-center w-full mt-6">
+              <motion.button
+                whileTap={{ scale: 0.9 }}
+                onClick={() => setRefreshTrigger((prev) => prev + 1)} // Increment refreshCount
+                className="flex items-center justify-center bg-sky-500 p-3 rounded-lg shadow-lg hover:bg-sky-600 transition-all text-white"
+              >
+                <span className="mr-2">New Quote</span>
+                <svg
+                  className="w-5 h-5 animate-spin"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
                 >
-                  <BiLeftArrow size={24} className="text-white" />
-                </button>
-                <div className="flex justify-center items-center p-4 bg-sky-500 rounded-lg">
-                  <a href="https://www.linkedin.com/in/addis-alemayehu-440942332">
-                    <LiaLinkedin size={24} className="text-white" />
-                  </a>
-                </div>
-              </div>
-              <button className="flex items-center justify-center bg-sky-500 p-4 rounded-lg">
-                <BiRightArrow size={24} className="text-white" />
-              </button>
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M17 8l4 4m0 0l-4 4m4-4H3"
+                  />
+                </svg>
+              </motion.button>
             </div>
           </div>
         </div>
-        {/* bottom */}
-        <div className=" bg-blue-500 absolute bottom-0 left-0 w-full h-[5px] rounded-xl"></div>
       </div>
-    </div>
+    </motion.div>
   );
 };
 
